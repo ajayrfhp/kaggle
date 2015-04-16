@@ -13,7 +13,7 @@ def sigmoid(y):
 
 df=pd.read_csv('train.csv',header=0)
 df['Gender'] = df['Sex'].map( {'female': 0, 'male': 1} ).astype(int)
-df[df['Age'].isnull()][['Sex','Pclass','Age']]
+
 
 for i in range(len(df)):
 	if(df.Age.isnull()[i]):
@@ -33,8 +33,8 @@ target=np.array(target)
 
 n=data.shape[0]
 m=data.shape[1]+1
-iterations=50000
-learningRate=0.15
+iterations=5000
+learningRate=0.1
 
 
 target=target.reshape((n,1))
@@ -50,16 +50,17 @@ for i in range(iterations):
 	h=sigmoid(dot(data,weights))
 	delta=dot(data.transpose(),(h-target))
 	weights=weights-(learningRate*delta)/n
+	cost=-(target.transpose()*np.log(h))-((1-target.transpose())*(1-np.log(h)))
+	print (sum(sum(cost))/n)
 
 h=sigmoid(dot(data,weights))
-print np.around(h)
 
 
 
 
 df2=pd.read_csv('test.csv',header=0)
 df2['Gender'] = df2['Sex'].map( {'female': 0, 'male': 1} ).astype(int)
-df2[df2['Age'].isnull()][['Sex','Pclass','Age']]
+
 
 for i in range(len(df2)):
 	if(df2.Age.isnull()[i]):
