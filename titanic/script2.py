@@ -33,8 +33,8 @@ target=np.array(target)
 
 n=data.shape[0]
 m=data.shape[1]+1
-iterations=5000
-learningRate=0.1
+iterations=50000
+learningRate=0.15
 
 
 target=target.reshape((n,1))
@@ -51,7 +51,7 @@ for i in range(iterations):
 	delta=dot(data.transpose(),(h-target))
 	weights=weights-(learningRate*delta)/n
 	cost=-(target.transpose()*np.log(h))-((1-target.transpose())*(1-np.log(h)))
-	print (sum(sum(cost))/n)
+	
 
 h=sigmoid(dot(data,weights))
 
