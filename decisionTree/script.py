@@ -48,28 +48,30 @@ def findEntropy(data, column, possibleValues):
 def search(t,testData):
     searchNode=t.get_tree_root()
     columnNames = list(data.columns.values)
-    while(columnNames):
-        nextRemoved=''
-
-        if(not searchNode.children):
-            break
-
-        print '                       '
-        key2=''
-        flag=0
-
-
+    cnt=0
+    while(cnt<len(columnNames)):
+        cnt+=1
+        key=''
+        #print searchNode.name
         for child in searchNode.children:
-         
-            
-            key=child.name.keys()[0]        
-            print str(key2)+str(key)
-            if(testData[key]==child.name[key]):
+            k=child.name.keys()
+            #print child.name
+            listOfKeys=searchNode.name.keys()
+            for element in k:
+                if(element not in listOfKeys):
+                    key=element
+                    break
+    
+        #print key
+        #print searchNode.children        
+        for child in searchNode.children:
+            #print child.name[key]
+            #print testData[key]
+            if(child.name[key]==testData[key]):
                 searchNode=child
-                if(key in columnNames):
-                    columnNames.remove(key)
-                break   
-        print '____________________________________________'         
+                break        
+       #print '______________________________'
+
     return searchNode
 
 
@@ -149,14 +151,16 @@ while columnUsed:
 
 
 #########CONSTRUCTED DECISION TREE TO DO IS SEARCH AND FIND APPROPRIATE CLASS USING ID3
-testData={'Outlook':'rain','Temperature':'cool','Humidity':'normal','Windy':'false'}
+testData={'Outlook':'overcast','Temperature':'hot','Humidity':'normal','Windy':False}
 columnNames = list(data.columns.values)
 columnNames.remove('Decision')
 
 
 
 searchNode=search(t,testData)
-print searchNode
+print searchNode.name
+
+
 for i in range(len(data)):
     flag=True
     for key in testData.keys():
