@@ -1,126 +1,169 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import numpy as np
 import pandas as pd
 from numpy import *
-from math import e,log
+from math import e, log
 from ete2 import Tree
-data=pd.read_csv('data.csv',header=0)
-
-def findEntropy(data,column,possibleValues):
-	pFeature={}
-	for feature in possibleValues[column]:
-		cnt=0
-		for row in data[column]:
-			if(row==feature):
-				cnt=cnt+1
-		pFeature[feature]=float(cnt)/len(data)		
-	
-	entropy=0
-
-	for feature in pFeature.keys():
-		entropyChild=0
-		pcnt=0
-		cnt=0
-
-		for i in range(len(data)):
-			if(data[column][i]==feature):
-				cnt=cnt+1
-			if(data['Decision'][i]=='p' and data[column][i]==feature):
-				pcnt+=1
-
-		pcnt=float(pcnt)/cnt
-		ncnt=1-pcnt
-		if(pcnt!=0 and ncnt!=0):
-			entropyChild=-(pcnt*log(pcnt,2))-(ncnt*log(ncnt,2))
-		elif(pcnt==0):
-			entropyChild=-(ncnt*log(ncnt,2))
-		elif(ncnt==0):
-			entropyChild=-(pcnt*log(pcnt,2))
-			
+data = pd.read_csv('data.csv', header=0)
 
 
+def findEntropy(data, column, possibleValues):
+    pFeature = {}
+    for feature in possibleValues[column]:
+        cnt = 0
+        for row in data[column]:
+            if row == feature:
+                cnt = cnt + 1
+        pFeature[feature] = float(cnt) / len(data)
 
-		entropy-=-pFeature[feature]*entropyChild
-	
-	return entropy	
+    entropy = 0
+
+    for feature in pFeature.keys():
+        entropyChild = 0
+        pcnt = 0
+        cnt = 0
+
+        for i in range(len(data)):
+            if data[column][i] == feature:
+                cnt = cnt + 1
+            if data['Decision'][i] == 'p' and data[column][i] \
+                == feature:
+                pcnt += 1
+
+        pcnt = float(pcnt) / cnt
+        ncnt = 1 - pcnt
+        if pcnt != 0 and ncnt != 0:
+            entropyChild = -(pcnt * log(pcnt, 2)) - ncnt * log(ncnt, 2)
+        elif pcnt == 0:
+            entropyChild = -(ncnt * log(ncnt, 2))
+        elif ncnt == 0:
+            entropyChild = -(pcnt * log(pcnt, 2))
+
+        entropy -= -pFeature[feature] * entropyChild
+
+    return entropy
+
+#########SEARCH BEGINS HERE
+def search(t,testData):
+    searchNode=t.get_tree_root()
+    columnNames = list(data.columns.values)
+    while(columnNames):
+        nextRemoved=''
+
+        if(not searchNode.children):
+            break
+
+        print '                       '
+        key2=''
+        flag=0
 
 
-	
+        for child in searchNode.children:
+         
+            
+            key=child.name.keys()[0]        
+            print str(key2)+str(key)
+            if(testData[key]==child.name[key]):
+                searchNode=child
+                if(key in columnNames):
+                    columnNames.remove(key)
+                break   
+        print '____________________________________________'         
+    return searchNode
+
+
+
+#########SEARCH ENDS HERE
 
 
 
 
 
 
-columnNames=list(data.columns.values)
-possibleValues={}
+
+
+columnNames = list(data.columns.values)
+possibleValues = {}
 for column in columnNames:
-	
-	for name in data[column]:
-		if(not (possibleValues.has_key(column))):
-			possibleValues[column]=[]
-		else:
-			xx=55555
-			#john snow
-		if(name in possibleValues[column]):
-			yyyyy=555
-		else:
-			possibleValues[column].append(name)
-	
+
+    for name in data[column]:
+        if not possibleValues.has_key(column):
+            possibleValues[column] = []
+        else:
+            xx = 55555
+
+            # john snow
+
+        if name in possibleValues[column]:
+            yyyyy = 555
+        else:
+            possibleValues[column].append(name)
 
 ############CONSTRUCT TREE
 
-columnUsed=columnNames
+columnUsed = columnNames
 
-t=Tree()
-root=t.get_tree_root()
-root.name={}
-parents=[root]
+t = Tree()
+root = t.get_tree_root()
+root.name = {}
+parents = [root]
 
+while columnUsed:
+    maxEntropy = 0
+    maxChoice = -1
 
-while(columnUsed):
-	maxEntropy=0
-	maxChoice=-1
+    for column in columnUsed:
+        if 0.94 - findEntropy(data, column, possibleValues) \
+            > maxEntropy and column != 'Decision':
+            maxEntropy = 0.94 - findEntropy(data, column,
+                    possibleValues)
+            maxChoice = column
+    if maxChoice in columnUsed:
+        columnUsed.remove(maxChoice)
 
-	for column in columnUsed:
-		if(0.94-findEntropy(data,column,possibleValues)>maxEntropy and column!='Decision'):
-			maxEntropy=0.94-findEntropy(data,column,possibleValues)
-			maxChoice=column
-	if(maxChoice in columnUsed):
-		columnUsed.remove(maxChoice)
+        
+    children = []
 
-	
+    if maxChoice != -1:
+        for parent in parents:
+            cnt = 0
+            for column in possibleValues[maxChoice]:
+                parent.add_child()
+            for column in possibleValues[maxChoice]:
 
-	
+                parent.children[cnt].name = {}
+                for key in parent.name:
+                    parent.children[cnt].name[key] = parent.name[key]
 
-	children=[]
-	
-	if(maxChoice!=-1):
-		for parent in parents:
-			cnt=0
-			for column in possibleValues[maxChoice]:
-				parent.add_child()																																																																	
-			for column in possibleValues[maxChoice]:
+                parent.children[cnt].name[maxChoice] = column
+                children.append(parent.children[cnt])
+                cnt += 1
+        parents = children
+    else:
 
-				parent.children[cnt].name={}
-				for key in parent.name:
-					parent.children[cnt].name[key]=parent.name[key]
+        break
 
-				parent.children[cnt].name[maxChoice]=column
-				children.append(parent.children[cnt])
-				cnt+=1
-		parents=children
-
-
-	else:
-		break
-	print '________'
-	cnt=0
+    cnt = 0
 
 
-print t
 
 #########CONSTRUCTED DECISION TREE TO DO IS SEARCH AND FIND APPROPRIATE CLASS USING ID3
+testData={'Outlook':'rain','Temperature':'cool','Humidity':'normal','Windy':'false'}
+columnNames = list(data.columns.values)
+columnNames.remove('Decision')
 
 
 
+searchNode=search(t,testData)
+print searchNode
+for i in range(len(data)):
+    flag=True
+    for key in testData.keys():
+        if(data[key][i]!=searchNode.name[key]):
+            flag=False
+    if(flag==True):
+        print i
+        print data['Decision'][i]
+        break                
 
