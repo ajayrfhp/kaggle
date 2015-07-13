@@ -30,7 +30,7 @@ def findEntropy(data, column, possibleValues):
             if data['Decision'][i] == 'p' and data[column][i] \
                 == feature:
                 pcnt += 1
-
+                
         pcnt = float(pcnt) / cnt
         ncnt = 1 - pcnt
         if pcnt != 0 and ncnt != 0:
@@ -124,6 +124,7 @@ while columnUsed:
     if maxChoice in columnUsed:
         columnUsed.remove(maxChoice)
 
+    print maxEntropy    
         
     children = []
 
@@ -151,16 +152,14 @@ while columnUsed:
 
 
 #########CONSTRUCTED DECISION TREE TO DO IS SEARCH AND FIND APPROPRIATE CLASS USING ID3
-testData={'Outlook':'overcast','Temperature':'hot','Humidity':'normal','Windy':False}
+testData={'Outlook':'rain','Temperature':'mild','Humidity':'normal','Windy':True}
 columnNames = list(data.columns.values)
 columnNames.remove('Decision')
 
 
 
 searchNode=search(t,testData)
-print searchNode.name
-
-
+print searchNode
 for i in range(len(data)):
     flag=True
     for key in testData.keys():
